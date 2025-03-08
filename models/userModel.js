@@ -13,6 +13,12 @@ const userSchema=new mongoose.Schema({
     password:{
         type:String,
         required:[true,"plz enter a password"]
+    },
+    Type:{
+        type:String,
+        enum:['Admin','User'],
+        default:'User',
+        required:[true,"Plz Set The Type"]
     }
 },
    {

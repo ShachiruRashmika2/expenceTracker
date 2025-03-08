@@ -1,13 +1,15 @@
 const userModel=require('../models/userModel')
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
+const { Types } = require('mongoose');
 
 exports.regNewUsers= async(req,res)=>{
 
 const {
 name,
 email,
-password
+password,
+Type
 
 
 }=req.body;
@@ -21,6 +23,7 @@ const newUser=new userModel({
     name,
     email,
     password:hashedPassword,
+    Type
   
 })
 
@@ -67,4 +70,21 @@ const genarateToken=(id)=>{
     return jwt.sign({id},process.env.JWT_SECRET,{
         expiresIn:'30d'
     })
+}
+
+exports.getProfile=async(req,res)=>{
+    const{_id,name,email,Type}=await userModel.findById(req.user._id);
+    res.status(200).json({id:_id,name,email,Type});
+}
+
+exports.deleteProfile=async(req,res)=>{
+
+    userModel.findByIdAndDelete(req.user._id).then(()=>{
+        res.status(200).json({massage:"Profile Deleted Succssfully"});
+    }
+        
+    ).catch((err)=>{
+        res.status(400).json({massge:"Profile Deletion Failed"});
+    })
+
 }
