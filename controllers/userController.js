@@ -88,3 +88,45 @@ exports.deleteProfile=async(req,res)=>{
     })
 
 }
+
+exports.updateProfile=async(req,res)=>{
+
+const prevUser=await userModel.findById(req.user._id);
+let password;
+
+ const{
+    name,
+    email,
+    newPassword
+ }=req.body;
+
+ if(req.body.newPassword){
+   
+//pasword Encryption
+const salt=await bcrypt.genSalt(10);
+password=await bcrypt.hash(newPassword,salt);
+ }
+ else{
+     password=prevUser.password;
+ }
+
+ if(!prevUser){
+    res.status(404).json({massage:"USer Does Not Exists"});
+ }
+else{
+
+    const updatedUser= new userModel({name,email,password:password}); ;
+
+    await updatedUser.save().then((updatedUser)=>{
+        res.status(200).json({massage:"User Updated Succsesfully",updatedUser});
+    }).catch((err)=>{
+
+        res.status(400).json({massage:"Updation failed",password,err})
+    })
+
+       
+}
+
+
+
+}
