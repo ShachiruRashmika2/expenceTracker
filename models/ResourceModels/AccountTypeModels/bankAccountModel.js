@@ -20,7 +20,7 @@ const SavingsAccountSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum:[Funds],
+        enum:['Funds'],
         default: 'Funds',
         immutable: true
      
@@ -35,10 +35,22 @@ const currentAccountSchema = new mongoose.Schema({
         default: 'Current',
         immutable: true
     },
+    AccountNumber: {
+        type: Number,
+        required: [true, "Please enter the account number"],
+        unique: true
+    },
     bank: {
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        enum:['Funds'],
+        default: 'Funds',
+        immutable: true
+     
+    }
  });
 
  const fixedAccountSchema = new mongoose.Schema({
@@ -49,6 +61,11 @@ const currentAccountSchema = new mongoose.Schema({
         default: 'Fixed',
         immutable: true
     },
+    AccountNumber: {
+        type: Number,
+        required: [true, "Please enter the account number"],
+        unique: true
+    },
     bank: {
         type: String,
         required: true
@@ -56,12 +73,16 @@ const currentAccountSchema = new mongoose.Schema({
     duration: {
         type: Number,
         required: true
-    }
+    },
+    category: {
+        type: String,
+        enum:['Funds'],
+        default: 'Funds',
+        immutable: true
+     
+    },
  
  });
 
- const savingsAccountModel = mongoose.model('SavingsAccount', SavingsAccountSchema);
- const currentAccountModel = mongoose.model('CurrentAccount', currentAccountSchema);
-const fixedAccountModel = mongoose.model('FixedAccount', fixedAccountSchema);
 
-module.exports = {savingsAccountModel, currentAccountModel, fixedAccountModel};
+module.exports ={fixedAccountSchema, SavingsAccountSchema, currentAccountSchema};

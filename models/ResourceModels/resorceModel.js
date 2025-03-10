@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const resourceType = require('./resourceTypeModel');
 
 const resourceSchema = new mongoose.Schema({
 
@@ -30,6 +31,11 @@ const resourceSchema = new mongoose.Schema({
        enum:['Credit','Overdrawn'],
        default:'Credit',
        required:true
+   },
+   resourceType : {
+       type: mongoose.Schema.Types.ObjectId,
+       required: true,
+       ref: 'resourceType'
    }
 
 })
@@ -60,3 +66,7 @@ resourceSchema.pre('save',async(next)=>{
     }
 
 })
+
+const resource=mongoose.model('resource',resourceSchema);
+
+module.exports=resource;

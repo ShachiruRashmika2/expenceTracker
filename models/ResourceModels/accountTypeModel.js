@@ -1,19 +1,17 @@
 const mongoose = require('mongoose');
-const bankAccountModel = require('./bankAccountModel');
+const bankAccountModel = require('./AccountTypeModels/bankAccountModel');
+const WalletModel = require('./AccountTypeModels/walletModel');
+const customAccount = require('./AccountTypeModels/customAccount');
 
 const accountTypeSchema = new mongoose.Schema({
     accountType: {
         type: String,
-        enum: ['Savings', 'Current', 'Fixed','custom'],
+        enum: ['Savings', 'Current', 'Fixed','custom','Wallet'],
         required: true
     },
-    accountCreatedType: {
-        type: String,
-        enum: ['Builtin', 'Custom'],
-        default: 'Builtin',
-    },
+   
     createdBy: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'user'
     }
@@ -22,8 +20,10 @@ const accountTypeSchema = new mongoose.Schema({
 
 const accountType = mongoose.model('accountType', accountTypeSchema);
 
-const SavingsAccount=accountType.discriminator('Savings',bankAccountModel.savingsAccountSchema);
+const SavingsAccount=accountType.discriminator('Savings',bankAccountModel.SavingsAccountSchema);
 const CurrentAccount=accountType.discriminator('Current',bankAccountModel.currentAccountSchema);
 const FixedAccount=accountType.discriminator('Fixed',bankAccountModel.fixedAccountSchema);
+const wallet=accountType.discriminator('Wallet',WalletModel.WalletSchema);
+const CustomAccount=accountType.discriminator('custom',customAccount.customAccountSchema);
 
-module.exports = {accountType, SavingsAccount, CurrentAccount, FixedAccount};
+module.exports={accountType,SavingsAccount,CurrentAccount,FixedAccount,wallet,CustomAccount};
