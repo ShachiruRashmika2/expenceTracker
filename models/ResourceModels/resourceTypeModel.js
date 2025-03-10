@@ -5,7 +5,7 @@ const resourceTypeSchema=new mongoose.Schema({
   
     resourceName:{
         type:String,
-        required:[true,"Plz enter a Account name"]
+        required:[true,"Plz enter a Resource name"]
     },
     accountType:{
         type:mongoose.Schema.Types.ObjectId,
@@ -22,7 +22,7 @@ const resourceTypeSchema=new mongoose.Schema({
     createdBy:{
         type:String,
         required:true,
-        ref:'user'
+        
     }
 
  

@@ -10,6 +10,8 @@ const getOneRoute=require('./routes/getOneRoute');
 const userRoute=require('./routes/userRoute');
 const accountTypeRoute = require('./routes/accountTypeRoutes/accountTypeRoute');
 const bankRoute = require('./routes/accountTypeRoutes/bankRoutes');
+const resourceTypeRoute = require('./routes/resourceTypeRoutes');
+
 
 const app = express();
 
@@ -22,3 +24,4 @@ app.use('/1',getOneRoute);
 app.use('/user',userRoute);
 app.use('/accType',accountTypeRoute);
 app.use('/bank',bankRoute);
+app.use('/resourceType',resourceTypeRoute);
