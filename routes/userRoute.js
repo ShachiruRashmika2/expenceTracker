@@ -3,11 +3,11 @@ const Router=express.Router();
 
 
 const userController=require('../controllers/userController');
-const {protect}=require('../middleware/authMiddleware');
+const {protect,privilageAdmin}=require('../middleware/authMiddleware');
 
 
 Router.post('/signup',userController.regNewUsers);
-Router.get('/all',userController.getAllUsers);
+Router.get('/all',privilageAdmin,userController.getAllUsers);
 Router.post("/login",userController.loginUser);
 Router.get('/profile',protect,userController.getProfile);
 Router.delete('/profile/delete',protect,userController.deleteProfile);
