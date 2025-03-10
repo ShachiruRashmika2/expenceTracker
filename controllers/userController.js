@@ -3,6 +3,8 @@ const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const { Types } = require('mongoose');
 
+
+//Register New User
 exports.regNewUsers= async(req,res)=>{
 
 const {
@@ -14,7 +16,7 @@ Type
 
 }=req.body;
 
-//pasword Encryption
+//Password Encryption
 const salt=await bcrypt.genSalt(10);
 const hashedPassword=await bcrypt.hash(password,salt);
 
@@ -43,6 +45,8 @@ exports.getAllUsers=async(req,res)=>{
     res.status(200).json(allUsers);
 }
 
+
+//User Login
 exports.loginUser=async(req,res)=>{
 
 
@@ -77,11 +81,13 @@ const genarateToken=(id,type)=>{
     })
 }
 
+//Get Profile
 exports.getProfile=async(req,res)=>{
     const{_id,name,email,Type}=await userModel.findById(req.user._id);
     res.status(200).json({id:_id,name,email,Type});
 }
 
+//Delete Profile
 exports.deleteProfile=async(req,res)=>{
 
     userModel.findByIdAndDelete(req.user._id).then(()=>{
@@ -94,6 +100,8 @@ exports.deleteProfile=async(req,res)=>{
 
 }
 
+
+//Update User
 exports.updateProfile=async(req,res)=>{
 
 const prevUser=await userModel.findById(req.user._id);
@@ -158,6 +166,33 @@ else{
 
        
 }
+
+
+
+}
+
+//Delete Users By Admin
+
+exports.deleteUsersByAdmin=async(req,res,next)=>{
+
+    const user_id=req.params.id;
+
+    const userToBeDeleted= await userModel.findById(user_id);
+     
+    await userModel.findByIdAndDelete(user_id).then(()=>{
+
+        res.status(200).json({massage:"User Deleted By an Admin"});
+        req.recEmail=userToBeDeleted.email;
+        req.sub="Account Deleted";
+        req.msg="Your Account has been Deleted by an Admin";
+        //next();
+
+
+    }).catch((err)=>{
+
+        res.status(400).json({massage:"Error While Updating",err});
+
+    })
 
 
 

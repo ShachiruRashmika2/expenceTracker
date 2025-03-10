@@ -4,14 +4,17 @@ const Router=express.Router();
 
 const userController=require('../controllers/userController');
 const {protect,privilageAdmin}=require('../middleware/authMiddleware');
+const {emailService}=require('../middleware/emailService');
 
-
+//User Private Routes
 Router.post('/signup',userController.regNewUsers);
-Router.get('/all',privilageAdmin,userController.getAllUsers);
 Router.post("/login",userController.loginUser);
 Router.get('/profile',protect,userController.getProfile);
 Router.delete('/profile/delete',protect,userController.deleteProfile);
 Router.put('/profile/update',protect,userController.updateProfile);
 
+//Admin Private Routes
+Router.get('/admin/all',privilageAdmin,userController.getAllUsers);
+Router.delete('/admin/delete/:id',privilageAdmin,userController.deleteUsersByAdmin/*,emailService.sendEmail*/);
 module.exports=Router;
 
