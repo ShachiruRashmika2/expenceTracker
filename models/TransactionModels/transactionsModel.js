@@ -21,18 +21,15 @@ const transactionSchema = new mongoose.Schema({
         enum: ['Income', 'Expense'],
         required: [true, "Please enter the type"]
     },
-    date: {
-        type: Date,
-        default: Date.now
-    },
-    account: {
+    
+    resource: {
         type: mongoose.Schema.Types.ObjectId,
         required: [true, "Please enter the account"],
-        ref: 'account'
+        ref: 'resource'
     },
     frequencyType: {
         type: String,
-        enum: ['recurring'],
+        enum: ['recurring','onetime'],
         required:[true,'Please enter a Frequancy']
     },
     tag:{
@@ -40,7 +37,21 @@ const transactionSchema = new mongoose.Schema({
 
     }
     
-},timeStramps = true);
+}, { timestamps: true });
+
+
+transactionSchema.pre('validate', async function(next) {
+    try {
+        if(this.amount < 0){
+            this.type = "Expense";
+        } else if(this.amount >= 0){
+            this.type = "Income";
+        }
+        next();
+    } catch (err) {
+        console.log(err);
+    }
+})
 
 const transaction = mongoose.model('transaction', transactionSchema);
 
@@ -58,6 +69,7 @@ const recurringTransactionSchema=mongoose.Schema({
     }
 
 })
+
 
 const reccuringTransacation=transaction.discriminator('recurringTransaction',recurringTransactionSchema);
 

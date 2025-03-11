@@ -13,6 +13,7 @@ const bankRoute = require('./routes/accountTypeRoutes/bankRoutes');
 const resourceTypeRoute = require('./routes/resourceTypeRoutes');
 const resourceRoute = require('./routes/resourceRoute');
 const transactionCategoryRoute=require('./routes/TransactionRoutes/TransactionCategoryRoute');
+const transactionRoute=require('./routes/TransactionRoutes/transactionRoute');
 
 
 const app = express();
@@ -29,3 +30,4 @@ app.use('/bank',bankRoute);
 app.use('/resourceType',resourceTypeRoute);
 app.use('/resource',resourceRoute);
 app.use('/transactionCat',transactionCategoryRoute);
+app.use('/transaction',transactionRoute);

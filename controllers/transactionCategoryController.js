@@ -34,7 +34,7 @@ exports.createTransactionType = async (req, res) => {
 
  
     await newTransactionCategory.save().then((newTransactionType)=>{
-        res.status(201).json(newTransactionType);
+        res.status(201).json({massage:'Created Succsefully',newTransactionType});
     }).catch ((err)=>{  
         res.status(400).json({ message:'error while creating',err});
     }) 
