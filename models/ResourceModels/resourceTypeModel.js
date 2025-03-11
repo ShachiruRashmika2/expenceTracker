@@ -1,4 +1,5 @@
 const mongoose=require('mongoose');
+const user=require('../userModel');
 
 
 const resourceTypeSchema=new mongoose.Schema({
@@ -20,7 +21,8 @@ const resourceTypeSchema=new mongoose.Schema({
     
     },
     createdBy:{
-        type:String,
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'user',
         required:true,
         
     }
@@ -30,19 +32,27 @@ const resourceTypeSchema=new mongoose.Schema({
 
 })
 
-resourceTypeSchema.pre('save',async(next)=>{
+resourceTypeSchema.pre('save',async function(next){
+
+    try{
+
+    const User=await user.findById(this.createdBy);
+
     //Set created Type
-    if(this.createdBy==='Admin'){
+    if(User.Type==='Admin'){
         this.resourceCreatedType='Builtin';
     }
-    else if(this.createdBy==='User'){
+    else if(User.Type==='User'){
         this.resourceCreatedType='Custom';
     }
 
 
 
 
-    next();
+    next();}
+    catch(err){
+        console.log(err);
+    }
 })
 
 const resourceType=mongoose.model('resourceType',resourceTypeSchema);

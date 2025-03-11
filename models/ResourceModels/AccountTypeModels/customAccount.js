@@ -7,9 +7,5 @@ exports.customAccountSchema = new mongoose.Schema({
         default: 'CustomAccount',
         required: [true, "Please enter the account type"]
     },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        required: [true, "Please enter the user"]
-    },
+ 
 });
