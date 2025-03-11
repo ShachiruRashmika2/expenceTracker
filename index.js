@@ -11,6 +11,7 @@ const userRoute=require('./routes/userRoute');
 const accountTypeRoute = require('./routes/accountTypeRoutes/accountTypeRoute');
 const bankRoute = require('./routes/accountTypeRoutes/bankRoutes');
 const resourceTypeRoute = require('./routes/resourceTypeRoutes');
+const resourceRoute = require('./routes/resourceRoute');
 
 
 const app = express();
@@ -25,3 +26,4 @@ app.use('/user',userRoute);
 app.use('/accType',accountTypeRoute);
 app.use('/bank',bankRoute);
 app.use('/resourceType',resourceTypeRoute);
+app.use('/resource',resourceRoute);

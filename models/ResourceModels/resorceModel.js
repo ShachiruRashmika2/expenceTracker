@@ -6,13 +6,15 @@ const resourceSchema = new mongoose.Schema({
    user:{
        type:mongoose.Schema.Types.ObjectId,
        required:true,
-       ref:'user'
+       ref:'user',
+       unique:[true,'User already has a resource']
+
 
    },
-   startDate:{
+  startDate:{
        type:Date,
        default:Date.now,
-       required:true,
+     required:true,
        immutable:true
    },
    balance:{
@@ -31,8 +33,8 @@ const resourceSchema = new mongoose.Schema({
        enum:['Credit','Overdrawn'],
        default:'Credit',
        required:true
-   },
-   resourceType : {
+      
+   },  resourceType : {
        type: mongoose.Schema.Types.ObjectId,
        required: true,
        ref: 'resourceType'
@@ -44,7 +46,7 @@ resourceSchema.pre('save',async(next)=>{
     
     //Set resourceState
     let daydiference;
-    if(startDate===Date.now()){
+    if(this.startDate===Date.now()){
        daydiference=1;
     }
     else{
