@@ -25,8 +25,8 @@ exports.createResourceType = async (req, res) => {
         
     })
 
-    await newResourceType.save().then(() => {
-        res.status(200).json({ massage: "Resource Type Created Succsesfully" })
+    await newResourceType.save().then((r) => {
+        res.status(200).json({ massage: "Resource Type Created Succsesfully" ,r})
     }).catch((err) => {
         res.status(400).json({ massage: "Error While Adding Resource Type", err,a:accType.createdBy})
     })
