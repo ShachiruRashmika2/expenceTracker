@@ -1,5 +1,13 @@
 
-const {reccuringTransacation,transaction}=require('../models/TransactionModels/transactionsModel')
+const {reccuringTransacation,transaction}=require('../models/TransactionModels/transactionsModel');
+const resourceModel=require('../models/ResourceModels/resorceModel');
+const currencyConverter=require('money');
+currencyConverter.base = "USD";
+currencyConverter.rates = {
+    "LKR": 200.5,
+    // Add other currencies here
+};
+
 
 // Get all transactions
 exports.getAllTransactions = async (req, res) => {
@@ -14,7 +22,17 @@ exports.getAllTransactions = async (req, res) => {
 //Get User's All Transactions
 exports.getAllUserTransactions=async(req,res)=>{
 
-await transaction.findById(req.user._id).then((trans)=>{
+await transaction.find({user:req.user._id}).populate(
+    [
+        {path:'user',select:'name'},
+        {path:'category',select:'categoryName'},
+        {path:'resource',select:'balance resourceType',populate: { path: 'resourceType', select: 'resourceName' }}
+      
+
+
+]
+
+).then((trans)=>{
     if (!trans) {
         return res.status(404).json({ message: 'Transactions not found' });
     }
@@ -32,7 +50,7 @@ await transaction.findById(req.user._id).then((trans)=>{
 // Get a single transaction by ID
 exports.getTransactionById = async (req, res) => {
    
-        await Transaction.findById(req.params.id).then((trans)=>{
+        await transaction.findById(req.params.id).then((trans)=>{
             if (!trans) {
                 return res.status(404).json({ message: 'Transaction not found' });
             }
@@ -55,11 +73,17 @@ exports.createTransaction = async (req, res) => {
         resource,
         frequencyType,
         tag,
-        frequency
+        frequency,
+        curruncy
     }=req.body;
-    
+    const convertedAmount= currencyConverter.convert(amount,{from:curruncy,to:"LKR"});
+
+    const Resource = await resourceModel.findOne({ user: req.user._id });
+   
+
+
     let newTransaction;
-    if(frequencyType){
+    if(frequencyType && Resource){
 
         if(frequencyType==='recurring'){
 
@@ -71,11 +95,14 @@ exports.createTransaction = async (req, res) => {
                 resource,
                 frequencyType,
                 tag,
-                frequency
+                frequency,
+                curruncy
 
 
 
             })
+
+
 
         }
         else if(frequencyType==='onetime'){
@@ -88,6 +115,7 @@ exports.createTransaction = async (req, res) => {
                 resource,
                 frequencyType,
                 tag,
+                curruncy
            
 
 
@@ -106,12 +134,33 @@ exports.createTransaction = async (req, res) => {
 
     }
 
-    await newTransaction.save().then((trans)=>{
-        res.status(200).json({massage:"transaction Recoded Succsessfully",trans});
-    }).catch((err)=>{
-        res.status(400).json({massage:"Error While making record",err})
-
+    newTransaction.save().then((trans) => {
+        resourceModel.findByIdAndUpdate(
+            Resource._id,
+            {balance:Resource.balance+amount},
+          
+          
+            { new: true }
+        )
+        .then(updatedResource => {
+            res.status(200).json({
+                message: "Transaction recorded successfully",
+                convertedAmount,
+                a:Resource.balance,
+                trans,
+                msg: "Record balance updated successfully",
+                
+               
+            });
+        })
+        .catch(err => {
+            res.status(400).json({ message: "Error while updating record balance", err ,a:Resource._id});
+        });
     })
+    .catch(err => {
+        res.status(400).json({ message: "Error while making record", err });
+    });
+
 
 
 };

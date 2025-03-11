@@ -34,40 +34,49 @@ const resourceSchema = new mongoose.Schema({
        default:'Credit',
        required:true
       
-   },  resourceType : {
+   },  
+   resourceType : {
        type: mongoose.Schema.Types.ObjectId,
        required: true,
        ref: 'resourceType'
+   },
+   defaultCurruncy:{
+
+    type:String,
+    required:[true,"Enter Curruncy"],
+    default:'LKR'
+
+
    }
 
-})
-
-resourceSchema.pre('save',async(next)=>{
-    
-    //Set resourceState
-    let daydiference;
-    if(this.startDate===Date.now()){
-       daydiference=1;
-    }
-    else{
-         daydiference=[Date.now()-this.startDate]/(1000*60*60*24);
-    }
-    
-    if(daydiference>150 ){
-        this.resourceState='Inactive';
-    }
-    else{
-        this.resourceState='Active';
-    }
-    //set balanceStatus
-    if(this.balance<0){
-        this.balanceStatus='Overdrawn';
-    }
-    else{
-        this.balanceStatus='Credit';
-    }
 
 })
+
+resourceSchema.pre('save', async function (next) {
+    let dayDifference = (Date.now() - this.startDate.getTime()) / (1000 * 60 * 60 * 24);
+    this.resourceState = dayDifference > 150 ? 'Inactive' : 'Active';
+    this.balanceStatus = this.balance < 0 ? 'Overdrawn' : 'Credit';
+    next();
+});
+
+resourceSchema.pre('findOneAndUpdate', async function (next) {
+    let update = this.getUpdate();
+
+    
+    if (update.startDate) {
+        let dayDifference = (Date.now() - new Date(update.startDate).getTime()) / (1000 * 60 * 60 * 24);
+        update.resourceState = dayDifference > 150 ? 'Inactive' : 'Active';
+    }
+    
+    if (update.balance !== undefined) {
+        update.balanceStatus = update.balance < 0 ? 'Overdrawn' : 'Credit';
+    }
+
+ 
+
+    this.setUpdate(update);
+    next();
+});
 
 const resource=mongoose.model('resource',resourceSchema);
 

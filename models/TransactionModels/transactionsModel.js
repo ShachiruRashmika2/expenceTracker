@@ -35,17 +35,21 @@ const transactionSchema = new mongoose.Schema({
     tag:{
         type:String,
 
+    },
+    curruncy:{
+        type:String,
+        default:'LKR',
+        required:[true,'Enter Curruncy']
     }
+
     
 }, { timestamps: true });
 
 
 transactionSchema.pre('validate', async function(next) {
     try {
-        if(this.amount < 0){
-            this.type = "Expense";
-        } else if(this.amount >= 0){
-            this.type = "Income";
+        if (this.amount !== undefined) {
+            this.type = this.amount < 0 ? "Expense" : "Income";
         }
         next();
     } catch (err) {
