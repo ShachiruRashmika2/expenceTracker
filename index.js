@@ -14,6 +14,7 @@ const resourceTypeRoute = require('./routes/resourceTypeRoutes');
 const resourceRoute = require('./routes/resourceRoute');
 const transactionCategoryRoute=require('./routes/TransactionRoutes/TransactionCategoryRoute');
 const transactionRoute=require('./routes/TransactionRoutes/transactionRoute');
+const goalRoute=require('./routes/goalRoute');
 
 
 const app = express();
@@ -31,3 +32,4 @@ app.use('/resourceType',resourceTypeRoute);
 app.use('/resource',resourceRoute);
 app.use('/transactionCat',transactionCategoryRoute);
 app.use('/transaction',transactionRoute);
+app.use('/goal',goalRoute);
