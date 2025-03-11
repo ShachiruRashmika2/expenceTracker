@@ -181,11 +181,21 @@ exports.updateTransaction = async (req, res) => {
 // Delete a transaction
 exports.deleteTransaction = async (req, res) => {
     try {
-        const deletedTransaction = await transaction.findByIdAndDelete(req.params.id);
+        const deletedTransaction = await transaction.findById(req.params.id);
         if (!deletedTransaction) {
-            return res.status(404).json({ message: 'Transaction not found' });
+           res.status(404).json({ message: 'Transaction not found' });
         }
-        res.status(200).json({ message: 'Transaction deleted' });
+        else{
+            if(deletedTransaction.user._id===req.user._id){
+                await deletedTransaction.remove().then(()=>{
+                    res.status(200).json({massage:"Deleted Succsesfully"})
+                }).catch((err)=>{
+                    res.status(400).json({massage:"Error while deliting",err})
+                })
+            }
+
+        }
+        
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
