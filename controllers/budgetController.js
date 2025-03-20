@@ -3,13 +3,14 @@ const Budget = require('../models/budgetModel');
 
 exports.createBudget = async (req, res) => {
     try {
-        const { user, name, amount } = req.body;
+        const {  name, amount,expDate } = req.body;
 
        
         const newBudget = new Budget({
             user:req.user._id,
             name,
-            amount
+            amount,
+            expDate
         });
 
         const savedBudget = await newBudget.save();
