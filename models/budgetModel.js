@@ -8,7 +8,7 @@ const budgetSchema = new Schema({
     amount: { type: Number, required: true },
     expDate:{type:Date,required:[true,'Plz set expiriation Date']},
     duration:{type:Number,required:[true,'Plz set duration ']},
-    createdAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now, immutable: true },
     updatedAt: { type: Date, default: Date.now }
    
 });

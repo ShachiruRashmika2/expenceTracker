@@ -77,12 +77,18 @@ exports.createTransaction = async (req, res) => {
         curruncy
     }=req.body;
     const convertedAmount= currencyConverter.convert(amount,{from:curruncy,to:"LKR"});
-
-    const Resource = await resourceModel.findOne({ user: req.user._id });
-   
-
-
+    
     let newTransaction;
+
+    const Resource = await resourceModel.findOne( {
+        $and:[{user:req.user._id},{_id:resource}]
+     });
+
+   if(!Resource){
+    return res.status(404).json({ message: 'Resource not found' });
+   }
+
+
     if(frequencyType && Resource){
 
         if(frequencyType==='recurring'){
@@ -90,7 +96,7 @@ exports.createTransaction = async (req, res) => {
             newTransaction= new reccuringTransacation({
 
                 user:req.user._id,
-                amount,
+                amount:convertedAmount,
                 category,
                 resource,
                 frequencyType,
@@ -110,7 +116,7 @@ exports.createTransaction = async (req, res) => {
             newTransaction=  new transaction({
 
                 user:req.user._id,
-                amount,
+                amount:convertedAmount,
                 category,
                 resource,
                 frequencyType,
@@ -137,7 +143,7 @@ exports.createTransaction = async (req, res) => {
     newTransaction.save().then((trans) => {
         resourceModel.findByIdAndUpdate(
             Resource._id,
-            {balance:Resource.balance+amount},
+            {balance:Resource.balance+convertedAmount},
           
           
             { new: true }

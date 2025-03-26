@@ -21,3 +21,12 @@ exports.createBudget = async (req, res) => {
         res.status(500).json({ message: 'Error creating budget', error });
     }
 };
+
+exports.getMyBudgets = async (req, res) => {
+    try {
+        const budgets = await Budget.find({ user: req.user._id }).populate('user', 'name');
+        res.status(200).json(budgets);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching budgets', error });
+    }
+}
