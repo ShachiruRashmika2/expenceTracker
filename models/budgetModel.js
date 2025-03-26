@@ -17,7 +17,7 @@ budgetSchema.pre('validate',async function(next) {
     if(!this.createdAt){
         this.createdAt=Date.now;
     }
-    this.duration=(this.expDate-this.createdAt)/(24*60*60*1000);
+    this.duration=Math.round((this.expDate-this.createdAt)/(24*60*60*1000));
     next();
 })
 

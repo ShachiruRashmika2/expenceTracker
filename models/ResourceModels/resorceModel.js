@@ -30,7 +30,7 @@ const resourceSchema = new mongoose.Schema({
    },
    balanceStatus:{
        type:String,
-       enum:['Credit','Overdrawn'],
+       enum:['Credit','Overdrawn','Exceeded','Not-Exceeded'],
        default:'Credit',
        required:true
       
@@ -47,6 +47,12 @@ const resourceSchema = new mongoose.Schema({
     default:'LKR'
 
 
+   },
+   budget:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'budget',
+  
+
    }
 
 
@@ -55,7 +61,26 @@ const resourceSchema = new mongoose.Schema({
 resourceSchema.pre('save', async function (next) {
     let dayDifference = (Date.now() - this.startDate.getTime()) / (1000 * 60 * 60 * 24);
     this.resourceState = dayDifference > 150 ? 'Inactive' : 'Active';
+    if(this.budget && this.balance){
+
+        await resource.populate('budget').execPopulate().then(()=>{
+
+            this.balanceStatus=(Math.abs(this.balance))<this.budget.amount?'Not-Exceeded':"Exceeded"
+
+        }).catch((err)=>{
+
+            console.log(err);
+
+        })  
+
+        
+
+
+
+    }
+    else if(!this.budget && this.balance){
     this.balanceStatus = this.balance < 0 ? 'Overdrawn' : 'Credit';
+    }
     next();
 });
 
@@ -77,6 +102,7 @@ resourceSchema.pre('findOneAndUpdate', async function (next) {
     this.setUpdate(update);
     next();
 });
+
 
 const resource=mongoose.model('resource',resourceSchema);
 
