@@ -1,12 +1,11 @@
 
 const {reccuringTransacation,transaction}=require('../models/TransactionModels/transactionsModel');
 const resourceModel=require('../models/ResourceModels/resorceModel');
-const currencyConverter=require('money');
-currencyConverter.base = "USD";
-currencyConverter.rates = {
-    "LKR": 200.5,
-    // Add other currencies here
-};
+const curruncyConverter=require('../utils/curruncyConverter');
+
+
+
+
 
 
 // Get all transactions
@@ -76,7 +75,7 @@ exports.createTransaction = async (req, res) => {
         frequency,
         curruncy
     }=req.body;
-    const convertedAmount= currencyConverter.convert(amount,{from:curruncy,to:"LKR"});
+    const convertedAmount= await curruncyConverter.ConvertCurrency(curruncy,'LKR',amount);
     
     let newTransaction;
 
