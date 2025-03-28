@@ -2,6 +2,9 @@
 const {reccuringTransacation,transaction}=require('../models/TransactionModels/transactionsModel');
 const resourceModel=require('../models/ResourceModels/resorceModel');
 const curruncyConverter=require('../utils/curruncyConverter');
+const budgetModel=require('../models/budgetModel');
+const noticationController=require('./notificationController');
+const notificationModel = require('../models/notificationModel');
 
 
 
@@ -11,9 +14,21 @@ const curruncyConverter=require('../utils/curruncyConverter');
 // Get all transactions
 exports.getAllTransactions = async (req, res) => {
     try {
-        const transactions = await transaction.find().exec();
+        const transactions = await transaction.find().select('-amount').exec();
         res.status(200).json(transactions);
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getAllTransactionsByTag = async (req, res) => {
+    try {
+        const transactions = await transaction.find().select('user tag').populate('user').exec();
+        if (!transactions) {
+            return res.status(404).json({ message: 'Transactions not found' });
+        }
+        res.status(200).json(transactions);
+    }  catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -75,8 +90,12 @@ exports.createTransaction = async (req, res) => {
         frequency,
         curruncy
     }=req.body;
-    const convertedAmount= await curruncyConverter.ConvertCurrency(curruncy,'LKR',amount);
-    
+    let convertedAmount;
+    if(curruncy==='LKR'){
+        convertedAmount=amount;}
+        else{
+     convertedAmount= await curruncyConverter.ConvertCurrency(curruncy,'LKR',amount);
+        }
     let newTransaction;
 
     const Resource = await resourceModel.findOne( {
@@ -140,14 +159,25 @@ exports.createTransaction = async (req, res) => {
     }
 
     newTransaction.save().then((trans) => {
+
+        noticationController.createNotification(req.user._id,"Transaction Susscessfully Created");
         resourceModel.findByIdAndUpdate(
             Resource._id,
             {balance:Resource.balance+convertedAmount},
           
           
             { new: true }
-        )
-        .then(updatedResource => {
+        ).then((updatedResource) => {
+                if(updatedResource.budget){
+                   budgetModel.findById(updatedResource.budget).then((budget) => {
+                    if(budget.amount<updatedResource.balance){
+                        noticationController.createNotification(req.user._id,"Budget Limit Exceeded");
+                    }
+                   })
+ }
+
+
+
             res.status(200).json({
                 message: "Transaction recorded successfully",
                 convertedAmount,
@@ -188,20 +218,46 @@ exports.deleteTransaction = async (req, res) => {
     try {
         const deletedTransaction = await transaction.findById(req.params.id);
         if (!deletedTransaction) {
-           res.status(404).json({ message: 'Transaction not found' });
+            return res.status(404).json({ message: 'Transaction not found' });
         }
-        else{
-            if(deletedTransaction.user._id===req.user._id){
-                await deletedTransaction.remove().then(()=>{
-                    res.status(200).json({massage:"Deleted Succsesfully"})
-                }).catch((err)=>{
-                    res.status(400).json({massage:"Error while deliting",err})
-                })
-            }
 
+    
+        const Resource = await resourceModel.findById(deletedTransaction.resource);
+
+        if (!Resource) {
+            return res.status(404).json({ message: 'Resource not found',a:deletedTransaction.amount });
         }
-        
+
+        let bal;
+        if (deletedTransaction.type === 'Income') {
+            bal = Resource.balance - deletedTransaction.amount;
+        } else if (deletedTransaction.type === 'Expense') {
+            bal = Resource.balance + deletedTransaction.amount;
+        } else {
+            return res.status(400).json({ message: 'Invalid transaction type', type: deletedTransaction.type });
+        }
+
+        await resourceModel.findByIdAndUpdate(
+            Resource._id,
+            { balance: bal },
+            { new: true }
+        ).then(() => {
+            console.log("Resource balance updated successfully", bal);
+        })
+        .catch(err => {
+            console.error("Error while updating resource balance", err);
+        });
+
+        await transaction.findByIdAndDelete(req.params.id).then(() => {
+            res.status(200).json({ message: 'Transaction deleted successfully' ,amt:bal });
+            noticationController.createNotification(req.user._id,"Transaction Susscessfully Deleted");
+        }
+       
+        ).catch((err) => {
+            res.status(400).json({ message: 'Error while deleting transaction', err });
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error", error });
     }
 };
