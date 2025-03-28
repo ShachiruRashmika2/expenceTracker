@@ -35,11 +35,11 @@ const privilageAdmin=async(req,res,next)=>{
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
 
         try{
-            //get token
+          
         token=req.headers.authorization.split(' ')[1];
-        //verify
+     
         const decoded=jwt.verify(token,process.env.JWT_SECRET);
-        //get user
+     
         if(decoded.type==='Admin'){
             req.user=await user.findById(decoded.id);
             next();

@@ -17,5 +17,6 @@ Router.get('/notification',protect,notificationController.getNotifications);
 
 Router.get('/admin/all',privilageAdmin,userController.getAllUsers);
 Router.delete('/admin/delete/:id',privilageAdmin,userController.deleteUsersByAdmin/*,emailService.sendEmail*/);
+Router.get('/genReport',protect,userController.genReport);
 module.exports=Router;
 

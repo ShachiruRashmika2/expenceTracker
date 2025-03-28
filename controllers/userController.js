@@ -1,4 +1,6 @@
 const userModel=require('../models/userModel')
+const resorceModel=require('../models/ResourceModels/resorceModel')
+const transactionModel=require('../models/TransactionModels/transactionsModel')
 const bcrypt=require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const { Types } = require('mongoose');
@@ -193,6 +195,62 @@ exports.deleteUsersByAdmin=async(req,res,next)=>{
         res.status(400).json({massage:"Error While Updating",err});
 
     })
+
+
+
+}
+
+exports.genReport=async(req,res)=>{
+
+try {
+    let User;
+    await userModel.findById(req.user._id).then((user) => {
+        User = user;
+    }).catch((err) => {
+        return res.status(500).json({ message: "Error fetching user", error: err.message });
+    });
+
+    let transactionCount = 0;
+    await transactionModel.transaction.countDocuments({ user: req.user._id }).then((count) => {
+        transactionCount = count;
+    }).catch((err) => {
+        return res.status(500).json({ message: "Error counting transactions", error: err.message });
+    });
+
+    let resourceCount = 0;
+    await resorceModel.countDocuments({ user: req.user._id }).then((count) => {
+        resourceCount = count;
+    }).catch((err) => {
+        return res.status(500).json({ message: "Error counting resources", error: err.message });
+    });
+
+    let expenceCont = 0;
+    await transactionModel.transaction.countDocuments({ user: req.user._id, type: "Expense" }).then((count) => {
+        expenceCont = count;
+    }).catch((err) => {
+        return res.status(500).json({ message: "Error counting expenses", error: err.message });
+    });
+
+    let incomeCount = 0;
+    await transactionModel.transaction.countDocuments({ user: req.user._id, type: "Income" }).then((count) => {
+        incomeCount = count;
+    }).catch((err) => {
+        return res.status(500).json({ message: "Error counting income", error: err.message });
+    });
+
+    res.status(200).json({
+        Name: User.name,
+        Email: User.email,
+        TotalTransactions: transactionCount,
+        TotalResources: resourceCount,
+        TotalExpences: expenceCont,
+        TotalIncome: incomeCount,
+
+    });
+} catch (err) {
+    res.status(500).json({ message: "Error generating report", error: err.message });
+}
+
 
 
 
